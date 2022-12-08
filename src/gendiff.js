@@ -12,6 +12,6 @@ program
     console.log(genDiff(filepath1, filepath2));
   });
 
-program.parse(process.argv);
+program.parse();
 
 export default program;
