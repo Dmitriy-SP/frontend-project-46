@@ -7,41 +7,37 @@ const getSpaceLevel = (level) => {
 };
 
 const pushLeaf = (leaf, level, type = 'withMarks') => {
+  let leafString;
   if (type === 'withoutMarks') {
-    return `${getSpaceLevel(level)}    ${leaf.key}: ${leaf.value}`;
+    leafString = `${getSpaceLevel(level)}    ${leaf.key}: ${leaf.value}`;
+  } else if (leaf.status === 'unchanged') {
+    leafString = `${getSpaceLevel(level)}    ${leaf.key}: ${leaf.value}`;
+  } else if (leaf.status === 'deleted') {
+    leafString = `${getSpaceLevel(level)}  - ${leaf.key}: ${leaf.value}`;
+  } else if (leaf.status === 'added') {
+    leafString = `${getSpaceLevel(level)}  + ${leaf.key}: ${leaf.value}`;
+  } else if (leaf.status === 'changed') {
+    leafString = `${getSpaceLevel(level)}  - ${leaf.key}: ${leaf.valueBefore}\n`;
+    leafString += `${getSpaceLevel(level)}  + ${leaf.key}: ${leaf.valueAfter}`;
   }
-  if (leaf.status === 'unchanged') {
-    return `${getSpaceLevel(level)}    ${leaf.key}: ${leaf.value}`;
-  }
-  if (leaf.status === 'deleted') {
-    return `${getSpaceLevel(level)}  - ${leaf.key}: ${leaf.value}`;
-  }
-  if (leaf.status === 'added') {
-    return `${getSpaceLevel(level)}  + ${leaf.key}: ${leaf.value}`;
-  }
-  if (leaf.status === 'changed') {
-    return `${getSpaceLevel(level)}  - ${leaf.key}: ${leaf.valueBefore}\n${getSpaceLevel(level)}  + ${leaf.key}: ${leaf.valueAfter}`;
-  }
-  return '';
+  return leafString;
 };
 
 const pushNode = (name, level, status, nodeText, nodeTextAfter) => {
+  let nodeString;
   if (status === 'unchanged') {
-    return `${getSpaceLevel(level)}    ${name}: {\n${nodeText}\n${getSpaceLevel(level)}    }`;
+    nodeString = `${getSpaceLevel(level)}    ${name}: {\n${nodeText}\n${getSpaceLevel(level)}    }`;
+  } else if (status === 'changed') {
+    nodeString = `${getSpaceLevel(level)}  - ${name}: ${nodeText}\n`;
+    nodeString += `${getSpaceLevel(level)}  + ${name}: {\n${nodeTextAfter}\n${getSpaceLevel(level)}    }`;
+  } else if (status === 'added') {
+    nodeString = `${getSpaceLevel(level)}  + ${name}: {\n${nodeText}\n${getSpaceLevel(level)}    }`;
+  } else if (status === 'deleted') {
+    nodeString = `${getSpaceLevel(level)}  - ${name}: {\n${nodeText}\n${getSpaceLevel(level)}    }`;
+  } else if (status === 'withoutMarks') {
+    nodeString = `${getSpaceLevel(level)}    ${name}: {\n${nodeText}\n${getSpaceLevel(level)}    }`;
   }
-  if (status === 'changed') {
-    return `${getSpaceLevel(level)}  - ${name}: ${nodeText}\n${getSpaceLevel(level)}  + ${name}: {\n${nodeTextAfter}\n${getSpaceLevel(level)}    }`;
-  }
-  if (status === 'added') {
-    return `${getSpaceLevel(level)}  + ${name}: {\n${nodeText}\n${getSpaceLevel(level)}    }`;
-  }
-  if (status === 'deleted') {
-    return `${getSpaceLevel(level)}  - ${name}: {\n${nodeText}\n${getSpaceLevel(level)}    }`;
-  }
-  if (status === 'withoutMarks') {
-    return `${getSpaceLevel(level)}    ${name}: {\n${nodeText}\n${getSpaceLevel(level)}    }`;
-  }
-  return '';
+  return nodeString;
 };
 
 const toStylishWithoutMarks = (diff, nodeLevel = 1) => {
@@ -59,6 +55,25 @@ const toStylishWithoutMarks = (diff, nodeLevel = 1) => {
   return `${result.join('\n')}`;
 };
 
+const addNode = (node, level) => {
+  let nodeString;
+  if (node.status === 'changedToValue') {
+    const nodeTextBefore = toStylishWithoutMarks(node.valueBefore, level + 1);
+    nodeString = pushNode(node.key, level, 'changed', node.valueAfter, nodeTextBefore);
+  } else if (node.status === 'changedToObject') {
+    const nodeTextAfter = toStylishWithoutMarks(node.valueAfter, level + 1);
+    nodeString = pushNode(node.key, level, 'changed', nodeTextAfter, node.valueBefore);
+  } else {
+    const nodeText = toStylishWithoutMarks(node.value, level + 1);
+    if (node.status === 'added') {
+      nodeString = pushNode(node.key, level, 'added', nodeText);
+    } else if (node.status === 'deleted') {
+      nodeString = pushNode(node.key, level, 'deleted', nodeText);
+    }
+  }
+  return nodeString;
+};
+
 const toStylish = (diff, nodeLevel = 1) => {
   const result = [];
   const level = nodeLevel;
@@ -67,22 +82,8 @@ const toStylish = (diff, nodeLevel = 1) => {
       if (diff[i].status === 'unchanged') {
         const nodeText = toStylish(diff[i].value, level + 1);
         result.push(pushNode(diff[i].key, level, 'unchanged', nodeText));
-      }
-      if (diff[i].status === 'changedToValue') {
-        const nodeTextBefore = toStylishWithoutMarks(diff[i].valueBefore, level + 1);
-        result.push(pushNode(diff[i].key, level, 'changed', diff[i].valueAfter, nodeTextBefore));
-      }
-      if (diff[i].status === 'changedToObject') {
-        const nodeTextAfter = toStylishWithoutMarks(diff[i].valueAfter, level + 1);
-        result.push(pushNode(diff[i].key, level, 'changed', nodeTextAfter, diff[i].valueBefore));
-      }
-      if (diff[i].status === 'added') {
-        const nodeText = toStylishWithoutMarks(diff[i].value, level + 1);
-        result.push(pushNode(diff[i].key, level, 'added', nodeText));
-      }
-      if (diff[i].status === 'deleted') {
-        const nodeText = toStylishWithoutMarks(diff[i].value, level + 1);
-        result.push(pushNode(diff[i].key, level, 'deleted', nodeText));
+      } else {
+        result.push(addNode(diff[i], level));
       }
     }
 
