@@ -44,8 +44,8 @@ const toStylishWithoutMarks = (diff, nodeLevel = 1) => {
   const result = [];
   for (let i = 0; i < diff.length; i += 1) {
     if (diff[i].type === 'node') {
-      const nodeValue = toStylishWithoutMarks(diff[i].value, nodeLevel + 1);
-      result.push(pushNode(diff[i].key, nodeLevel, 'withoutMarks', nodeValue));
+      const nodeText = toStylishWithoutMarks(diff[i].value, nodeLevel + 1);
+      result.push(pushNode(diff[i].key, nodeLevel, 'withoutMarks', nodeText));
     }
     if (diff[i].type === 'leaf') {
       result.push(pushLeaf(diff[i], nodeLevel, 'withoutMarks'));

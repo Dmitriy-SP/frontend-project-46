@@ -36,41 +36,38 @@ const isBothNode = (value1, value2) => (typeof value1 === 'object' && typeof val
 const isNotNull = (object) => !Object.is(object, null);
 const hasInnerNode = (object, key) => (Object.hasOwn(object, key) && typeof object[key] === 'object');
 
-const buildDiff = (tree1, tree2, keys) => {
-  const diff = keys.map((key) => {
-    if (hasBothNode(tree1, tree2, key)) {
-      if (isBothNode(tree1[key], tree2[key])) {
-        const nodeKeys = getKeys(tree1[key], tree2[key]);
-        const nodeValue = buildDiff(tree1[key], tree2[key], nodeKeys);
-        return buildPoint('node', 'unchanged', key, nodeValue);
-      }
-      if (typeof tree1[key] === 'object' && typeof tree2[key] !== 'object' && isNotNull(tree1[key])) {
-        const nodeKeys = getKeys(tree1[key]);
-        const nodeValue = buildDiff(tree1[key], tree2, nodeKeys);
-        return buildPoint('node', 'changedToValue', key, nodeValue, tree2[key]);
-      }
-      if (typeof tree1[key] !== 'object' && typeof tree2[key] === 'object' && isNotNull(tree2[key])) {
-        const nodeKeys = getKeys(tree2[key]);
-        const nodeValue = buildDiff(tree1, tree2[key], nodeKeys);
-        return buildPoint('node', 'changedToObject', key, nodeValue, tree2[key]);
-      }
+const buildDiff = (tree1, tree2, keys) => keys.map((key) => {
+  if (hasBothNode(tree1, tree2, key)) {
+    if (isBothNode(tree1[key], tree2[key])) {
+      const nodeKeys = getKeys(tree1[key], tree2[key]);
+      const nodeValue = buildDiff(tree1[key], tree2[key], nodeKeys);
+      return buildPoint('node', 'unchanged', key, nodeValue);
     }
-
-    if (hasInnerNode(tree1, key) && isNotNull(tree1[key])) {
+    if (typeof tree1[key] === 'object' && typeof tree2[key] !== 'object' && isNotNull(tree1[key])) {
       const nodeKeys = getKeys(tree1[key]);
       const nodeValue = buildDiff(tree1[key], tree2, nodeKeys);
-      return buildPoint('node', 'deleted', key, nodeValue);
+      return buildPoint('node', 'changedToValue', key, nodeValue, tree2[key]);
     }
-
-    if (hasInnerNode(tree2, key) && isNotNull(tree2[key])) {
+    if (typeof tree1[key] !== 'object' && typeof tree2[key] === 'object' && isNotNull(tree2[key])) {
       const nodeKeys = getKeys(tree2[key]);
       const nodeValue = buildDiff(tree1, tree2[key], nodeKeys);
-      return buildPoint('node', 'added', key, nodeValue);
+      return buildPoint('node', 'changedToObject', key, nodeValue, tree2[key]);
     }
+  }
 
-    return getLeafDiff(tree1, tree2, key);
-  });
-  return diff;
-};
+  if (hasInnerNode(tree1, key) && isNotNull(tree1[key])) {
+    const nodeKeys = getKeys(tree1[key]);
+    const nodeValue = buildDiff(tree1[key], tree2, nodeKeys);
+    return buildPoint('node', 'deleted', key, nodeValue);
+  }
+
+  if (hasInnerNode(tree2, key) && isNotNull(tree2[key])) {
+    const nodeKeys = getKeys(tree2[key]);
+    const nodeValue = buildDiff(tree1, tree2[key], nodeKeys);
+    return buildPoint('node', 'added', key, nodeValue);
+  }
+
+  return getLeafDiff(tree1, tree2, key);
+});
 
 export default buildDiff;
