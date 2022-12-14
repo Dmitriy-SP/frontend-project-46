@@ -41,21 +41,17 @@ const pushNode = (name, level, status, nodeText, nodeTextAfter) => {
 };
 
 const toStylishWithoutMarks = (diff, nodeLevel = 1) => {
-  // const result = [];
   let result = '';
   for (let i = 0; i < diff.length; i += 1) {
     if (diff[i].type === 'node') {
       const nodeText = toStylishWithoutMarks(diff[i].value, nodeLevel + 1);
       result += pushNode(diff[i].key, nodeLevel, 'withoutMarks', nodeText);
-      // result.push(pushNode(diff[i].key, nodeLevel, 'withoutMarks', nodeText));
     }
     if (diff[i].type === 'leaf') {
       result += pushLeaf(diff[i], nodeLevel, 'withoutMarks');
-      // result.push(pushLeaf(diff[i], nodeLevel, 'withoutMarks'));
     }
   }
   return result.slice(0, -1);
-  // return `${result.join('\n')}`;
 };
 
 const addNode = (node, level) => {
@@ -78,7 +74,6 @@ const addNode = (node, level) => {
 };
 
 const toStylish = (diff, nodeLevel = 1) => {
-  // const result = [];
   let result = '';
   const level = nodeLevel;
   for (let i = 0; i < diff.length; i += 1) {
@@ -86,20 +81,16 @@ const toStylish = (diff, nodeLevel = 1) => {
       if (diff[i].status === 'unchanged') {
         const nodeText = toStylish(diff[i].value, level + 1);
         result += pushNode(diff[i].key, level, 'unchanged', nodeText);
-        // result.push(pushNode(diff[i].key, level, 'unchanged', nodeText));
       } else {
         result += addNode(diff[i], level);
-        // result.push(addNode(diff[i], level));
       }
     }
 
     if (diff[i].type === 'leaf') {
       result += pushLeaf(diff[i], level);
-      // result.push(pushLeaf(diff[i], level));
     }
   }
   return result.slice(0, -1);
-  // return `${result.join('\n')}`;
 };
 
 export default (diff) => `{\n${toStylish(diff)}\n}`;

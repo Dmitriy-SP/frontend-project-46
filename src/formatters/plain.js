@@ -12,11 +12,11 @@ const buildNote = (path, type, status, value, valueAfter) => {
   }
   let nodeString = '';
   if (status === 'changed') {
-    nodeString = `Property '${name}' was updated. From ${valueWithQuotesIfNeeded(value)} to ${valueWithQuotesIfNeeded(valueAfter)}\n`;
+    nodeString = `Property '${name}' was updated. From ${valueWithQuotesIfNeeded(value)} to ${valueWithQuotesIfNeeded(valueAfter)}`;
   } else if (status === 'added') {
-    nodeString = `Property '${name}' was added with value: ${valueWithQuotesIfNeeded(value)}\n`;
+    nodeString = `Property '${name}' was added with value: ${valueWithQuotesIfNeeded(value)}`;
   } else if (status === 'deleted') {
-    nodeString = `Property '${name}' was removed\n`;
+    nodeString = `Property '${name}' was removed`;
   }
   return nodeString;
 };
@@ -58,24 +58,22 @@ const addNote = (type, object, path) => {
 };
 
 const toPlain = (diff, nodePath = '') => {
-  let result = '';
-  for (let i = 0; i < diff.length; i += 1) {
+  const result = diff.flatMap((item) => {
     let path = nodePath;
-    if (diff[i].type === 'node') {
-      path += `${diff[i].key}.`;
-      if (diff[i].status === 'unchanged') {
-        result += toPlain(diff[i].value, path);
-      } else {
-        result += addNote('node', diff[i], path);
+    if (item.type === 'node') {
+      path += `${item.key}.`;
+      if (item.status === 'unchanged') {
+        return toPlain(item.value, path);
       }
+      return addNote('node', item, path);
     }
-
-    if (diff[i].type === 'leaf') {
-      result += addNote('leaf', diff[i], path);
+    if (item.type === 'leaf') {
+      return addNote('leaf', item, path);
     }
-  }
+    return '';
+  }).filter((item) => item !== '');
 
-  return result;
+  return result.join('\n');
 };
 
-export default (diff) => toPlain(diff).slice(0, -1);
+export default (diff) => toPlain(diff);
