@@ -1,4 +1,4 @@
-# gendiff:
+# gendiff
 
 [![Actions Status](https://github.com/Dmitriy-SP/frontend-project-46/workflows/hexlet-check/badge.svg)](https://github.com/Dmitriy-SP/frontend-project-46/actions)
 [![CI](https://github.com/Dmitriy-SP/frontend-project-46/actions/workflows/github-action-check.yml/badge.svg)](https://github.com/Dmitriy-SP/frontend-project-46/actions/workflows/github-action-check.yml)
@@ -58,6 +58,6 @@ Options:
 ### Submitted files:
 
 [file1.json](https://github.com/Dmitriy-SP/frontend-project-46/blob/main/__tests__/__fixtures__/file1.json)
-[file2.json](https://github.com/Dmitriy-SP/frontend-project-46/blob/main/__tests__/__fixtures__/file1.yaml)
-[file1.yml](https://github.com/Dmitriy-SP/frontend-project-46/blob/main/__tests__/__fixtures__/file2.json)
+[file2.json](https://github.com/Dmitriy-SP/frontend-project-46/blob/main/__tests__/__fixtures__/file2.json)
+[file1.yml](https://github.com/Dmitriy-SP/frontend-project-46/blob/main/__tests__/__fixtures__/file1.yaml)
 [file2.yaml](https://github.com/Dmitriy-SP/frontend-project-46/blob/main/__tests__/__fixtures__/file2.yml)

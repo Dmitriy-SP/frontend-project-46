@@ -27,7 +27,10 @@ const buildNode = (name, level, status, nodeText, nodeTextAfter) => {
   let nodeString = '';
   if (status === 'unchanged') {
     nodeString = `${getNoteLevel(level)}    ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
-  } else if (status === 'changed') {
+  } else if (status === 'changedToValue') {
+    nodeString = `${getNoteLevel(level)}  - ${name}: {\n${nodeTextAfter}\n${getNoteLevel(level)}    }\n`;
+    nodeString += `${getNoteLevel(level)}  + ${name}: ${nodeText}`;
+  } else if (status === 'changedToObject') {
     nodeString = `${getNoteLevel(level)}  - ${name}: ${nodeText}\n`;
     nodeString += `${getNoteLevel(level)}  + ${name}: {\n${nodeTextAfter}\n${getNoteLevel(level)}    }`;
   } else if (status === 'added') {
@@ -54,10 +57,10 @@ const buildNote = (node, level) => {
   let nodeString = '';
   if (node.status === 'changedToValue') {
     const nodeTextBefore = toStylishWithoutMarks(node.valueBefore, level + 1);
-    nodeString = buildNode(node.key, level, 'changed', node.valueAfter, nodeTextBefore);
+    nodeString = buildNode(node.key, level, 'changedToValue', node.valueAfter, nodeTextBefore);
   } else if (node.status === 'changedToObject') {
     const nodeTextAfter = toStylishWithoutMarks(node.valueAfter, level + 1);
-    nodeString = buildNode(node.key, level, 'changed', node.valueBefore, nodeTextAfter);
+    nodeString = buildNode(node.key, level, 'changedToObject', node.valueBefore, nodeTextAfter);
   } else {
     const nodeText = toStylishWithoutMarks(node.value, level + 1);
     if (node.status === 'added') {
