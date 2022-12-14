@@ -45,11 +45,9 @@ const toStylishWithoutMarks = (diff, level = 1) => diff.flatMap((item) => {
     const nodeText = toStylishWithoutMarks(item.value, level + 1);
     return buildNode(item.key, level, 'withoutMarks', nodeText);
   }
-  if (item.type === 'leaf') {
-    return buildLeaf(item, level, 'withoutMarks');
-  }
-  return '';
+  return buildLeaf(item, level, 'withoutMarks');
 })
+  .filter((item) => item !== '')
   .join('\n');
 
 const buildNote = (node, level) => {
@@ -59,7 +57,7 @@ const buildNote = (node, level) => {
     nodeString = buildNode(node.key, level, 'changed', node.valueAfter, nodeTextBefore);
   } else if (node.status === 'changedToObject') {
     const nodeTextAfter = toStylishWithoutMarks(node.valueAfter, level + 1);
-    nodeString = buildNode(node.key, level, 'changed', nodeTextAfter, node.valueBefore);
+    nodeString = buildNode(node.key, level, 'changed', node.valueBefore, nodeTextAfter);
   } else {
     const nodeText = toStylishWithoutMarks(node.value, level + 1);
     if (node.status === 'added') {
@@ -79,12 +77,9 @@ const toStylish = (diff, level = 1) => diff.flatMap((item) => {
     }
     return buildNote(item, level);
   }
-
-  if (item.type === 'leaf') {
-    return buildLeaf(item, level);
-  }
-  return '';
+  return buildLeaf(item, level);
 })
+  .filter((item) => item !== '')
   .join('\n');
 
 export default (diff) => `{\n${toStylish(diff)}\n}`;

@@ -2,7 +2,7 @@ import toPlain from './plain.js';
 import toStylish from './stylish.js';
 import toJson from './json.js';
 
-const chouseFormatters = (diff, formatType) => {
+const chouseFormatters = (diff, formatType = 'stylish') => {
   if (formatType === 'stylish') {
     return toStylish(diff);
   }

@@ -56,10 +56,7 @@ const toPlain = (diff, nodePath = '') => diff.flatMap((item) => {
     }
     return buildNode(item, path);
   }
-  if (item.type === 'leaf') {
-    return buildLeaf(item, path);
-  }
-  return '';
+  return buildLeaf(item, path);
 });
 
 export default (diff) => toPlain(diff)
