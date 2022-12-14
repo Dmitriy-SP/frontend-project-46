@@ -42,14 +42,13 @@ const pushNode = (name, level, status, nodeText, nodeTextAfter) => {
 
 const toStylishWithoutMarks = (diff, nodeLevel = 1) => {
   const result = [];
-  const level = nodeLevel;
   for (let i = 0; i < diff.length; i += 1) {
     if (diff[i].type === 'node') {
-      const nodeText = toStylishWithoutMarks(diff[i].value, level + 1);
-      result.push(pushNode(diff[i].key, level, 'withoutMarks', nodeText));
+      const nodeValue = toStylishWithoutMarks(diff[i].value, nodeLevel + 1);
+      result.push(pushNode(diff[i].key, nodeLevel, 'withoutMarks', nodeValue));
     }
     if (diff[i].type === 'leaf') {
-      result.push(pushLeaf(diff[i], level, 'withoutMarks'));
+      result.push(pushLeaf(diff[i], nodeLevel, 'withoutMarks'));
     }
   }
   return `${result.join('\n')}`;
