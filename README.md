@@ -19,7 +19,7 @@ Supported JSON and YAML file formats.
 Уou can use both absolute and relative paths when accessing to files.
 Supported output formatters: stylish, plain and json.
 If you want to import as a function it looks like:
-genDiff(<filepath1>, <filepath2>, <formatName>), and its outcome is the string.
+`genDiff(<filepath1>, <filepath2>, <formatName>)`, and its outcome is the string.
 For more information see [examples](#Examples).
 
 ## Installation
@@ -54,3 +54,10 @@ Options:
 
 ### Available formatters
 <a href="https://asciinema.org/a/66mats3kaB2vEeARtUDvpUVqf" target="_blank"><img src="https://asciinema.org/a/66mats3kaB2vEeARtUDvpUVqf.svg" /></a>
+
+### Submitted files:
+
+[file1.json](https://github.com/Dmitriy-SP/frontend-project-46/blob/main/__tests__/__fixtures__/file1.json)
+[file2.json](https://github.com/Dmitriy-SP/frontend-project-46/blob/main/__tests__/__fixtures__/file1.yaml)
+[file1.yml](https://github.com/Dmitriy-SP/frontend-project-46/blob/main/__tests__/__fixtures__/file2.json)
+[file2.yaml](https://github.com/Dmitriy-SP/frontend-project-46/blob/main/__tests__/__fixtures__/file2.yml)
