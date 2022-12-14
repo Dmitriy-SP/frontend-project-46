@@ -33,6 +33,7 @@ const getLeafDiff = (node1, node2, key) => {
 
 const hasBothNode = (obj1, obj2, key) => (Object.hasOwn(obj1, key) && Object.hasOwn(obj2, key));
 const isBothNode = (value1, value2) => (typeof value1 === 'object' && typeof value2 === 'object');
+const isNodeAndLeaf = (obj1, obj2) => (typeof obj1 === 'object' && typeof obj2 !== 'object');
 const isNotNull = (object) => !Object.is(object, null);
 const hasInnerNode = (object, key) => (Object.hasOwn(object, key) && typeof object[key] === 'object');
 /*
@@ -43,12 +44,12 @@ const buildDiff = (tree1, tree2, keys) => keys.map((key) => {
       const nodeValue = buildDiff(tree1[key], tree2[key], nodeKeys);
       return buildPoint('node', 'unchanged', key, nodeValue);
     }
-    if (typeof tree1[key] === 'object' && typeof tree2[key] !== 'object' && isNotNull(tree1[key])) {
+    if (isNodeAndLeaf(tree1[key], tree2[key]) && isNotNull(tree1[key])) {
       const nodeKeys = getKeys(tree1[key]);
       const nodeValue = buildDiff(tree1[key], tree2, nodeKeys);
       return buildPoint('node', 'changedToValue', key, nodeValue, tree2[key]);
     }
-    if (typeof tree1[key] !== 'object' && typeof tree2[key] === 'object' && isNotNull(tree2[key])) {
+    if (isNodeAndLeaf(tree2[key], tree1[key]) && isNotNull(tree2[key])) {
       const nodeKeys = getKeys(tree2[key]);
       const nodeValue = buildDiff(tree1, tree2[key], nodeKeys);
       return buildPoint('node', 'changedToObject', key, nodeValue, tree2[key]);
@@ -78,11 +79,11 @@ const buildDiff = (tree1, tree2, keys) => keys.map((key) => {
       const nodeKeys = getKeys(tree1[key], tree2[key]);
       const nodeValue = buildDiff(tree1[key], tree2[key], nodeKeys);
       point = buildPoint('node', 'unchanged', key, nodeValue);
-    } else if (typeof tree1[key] === 'object' && typeof tree2[key] !== 'object' && isNotNull(tree1[key])) {
+    } else if (isNodeAndLeaf(tree1[key], tree2[key]) && isNotNull(tree1[key])) {
       const nodeKeys = getKeys(tree1[key]);
       const nodeValue = buildDiff(tree1[key], tree2, nodeKeys);
       point = buildPoint('node', 'changedToValue', key, nodeValue, tree2[key]);
-    } else if (typeof tree1[key] !== 'object' && typeof tree2[key] === 'object' && isNotNull(tree2[key])) {
+    } else if (isNodeAndLeaf(tree2[key], tree1[key]) && isNotNull(tree2[key])) {
       const nodeKeys = getKeys(tree2[key]);
       const nodeValue = buildDiff(tree1, tree2[key], nodeKeys);
       point = buildPoint('node', 'changedToObject', key, nodeValue, tree2[key]);
@@ -96,6 +97,7 @@ const buildDiff = (tree1, tree2, keys) => keys.map((key) => {
     const nodeValue = buildDiff(tree1, tree2[key], nodeKeys);
     point = buildPoint('node', 'added', key, nodeValue);
   }
+
   if (point === '') {
     point = getLeafDiff(tree1, tree2, key);
   }
