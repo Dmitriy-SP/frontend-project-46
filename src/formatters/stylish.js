@@ -1,9 +1,9 @@
+import _ from 'lodash';
+
 const getNoteLevel = (level) => {
   const spaceArray = [];
-  for (let i = 1; i < level; i += 1) {
-    spaceArray.push('    ');
-  }
-  return spaceArray.join('');
+  spaceArray.length = level - 1;
+  return _.fill(spaceArray, '    ').join('');
 };
 
 const buildLeaf = (leaf, level, type = 'withMarks') => {
