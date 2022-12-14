@@ -22,31 +22,33 @@ const buildNote = (path, type, status, value, valueAfter) => {
   return '';
 };
 
-const addLeaf = (leaf, path) => {
-  if (leaf.status === 'changed') {
-    return buildNote(`${path}${leaf.key}`, 'leaf', 'changed', leaf.valueBefore, leaf.valueAfter);
+const addNote = (type, object, path) => {
+  if (type === 'node') {
+    if (object.status === 'changedToValue') {
+      return buildNote(path, 'node', 'changed', '[complex value]', object.valueAfter);
+    }
+    if (object.status === 'changedToObject') {
+      return buildNote(path, 'node', 'changed', object.valueBefore, '[complex value]');
+    }
+    if (object.status === 'added') {
+      return buildNote(path, 'node', 'added', '[complex value]');
+    }
+    if (object.status === 'deleted') {
+      return buildNote(path, 'node', 'deleted');
+    }
+    return '';
   }
-  if (leaf.status === 'deleted') {
-    return buildNote(`${path}${leaf.key}`, 'leaf', 'deleted');
-  }
-  if (leaf.status === 'added') {
-    return buildNote(`${path}${leaf.key}`, 'leaf', 'added', leaf.value);
-  }
-  return '';
-};
-
-const addNode = (node, path) => {
-  if (node.status === 'changedToValue') {
-    return buildNote(path, 'node', 'changed', '[complex value]', node.valueAfter);
-  }
-  if (node.status === 'changedToObject') {
-    return buildNote(path, 'node', 'changed', node.valueBefore, '[complex value]');
-  }
-  if (node.status === 'added') {
-    return buildNote(path, 'node', 'added', '[complex value]');
-  }
-  if (node.status === 'deleted') {
-    return buildNote(path, 'node', 'deleted');
+  if (type === 'leaf') {
+    if (object.status === 'changed') {
+      return buildNote(`${path}${object.key}`, 'leaf', 'changed', object.valueBefore, object.valueAfter);
+    }
+    if (object.status === 'deleted') {
+      return buildNote(`${path}${object.key}`, 'leaf', 'deleted');
+    }
+    if (object.status === 'added') {
+      return buildNote(`${path}${object.key}`, 'leaf', 'added', object.value);
+    }
+    return '';
   }
   return '';
 };
@@ -59,12 +61,13 @@ const toPlain = (diff, nodePath = '') => {
       path += `${diff[i].key}.`;
       if (diff[i].status === 'unchanged') {
         result += toPlain(diff[i].value, path);
+      } else {
+        result += addNote('node', diff[i], path);
       }
-      result += addNode(diff[i], path);
     }
 
     if (diff[i].type === 'leaf') {
-      result += addLeaf(diff[i], path);
+      result += addNote('leaf', diff[i], path);
     }
   }
 
