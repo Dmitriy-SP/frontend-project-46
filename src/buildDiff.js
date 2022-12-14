@@ -35,7 +35,7 @@ const hasBothNode = (obj1, obj2, key) => (Object.hasOwn(obj1, key) && Object.has
 const isBothNode = (value1, value2) => (typeof value1 === 'object' && typeof value2 === 'object');
 const isNotNull = (object) => !Object.is(object, null);
 const hasInnerNode = (object, key) => (Object.hasOwn(object, key) && typeof object[key] === 'object');
-
+/*
 const buildDiff = (tree1, tree2, keys) => keys.map((key) => {
   if (hasBothNode(tree1, tree2, key)) {
     if (isBothNode(tree1[key], tree2[key])) {
@@ -68,6 +68,39 @@ const buildDiff = (tree1, tree2, keys) => keys.map((key) => {
   }
 
   return getLeafDiff(tree1, tree2, key);
+});
+*/
+
+const buildDiff = (tree1, tree2, keys) => keys.map((key) => {
+  let point = '';
+  if (hasBothNode(tree1, tree2, key)) {
+    if (isBothNode(tree1[key], tree2[key])) {
+      const nodeKeys = getKeys(tree1[key], tree2[key]);
+      const nodeValue = buildDiff(tree1[key], tree2[key], nodeKeys);
+      point = buildPoint('node', 'unchanged', key, nodeValue);
+    } else if (typeof tree1[key] === 'object' && typeof tree2[key] !== 'object' && isNotNull(tree1[key])) {
+      const nodeKeys = getKeys(tree1[key]);
+      const nodeValue = buildDiff(tree1[key], tree2, nodeKeys);
+      point = buildPoint('node', 'changedToValue', key, nodeValue, tree2[key]);
+    } else if (typeof tree1[key] !== 'object' && typeof tree2[key] === 'object' && isNotNull(tree2[key])) {
+      const nodeKeys = getKeys(tree2[key]);
+      const nodeValue = buildDiff(tree1, tree2[key], nodeKeys);
+      point = buildPoint('node', 'changedToObject', key, nodeValue, tree2[key]);
+    }
+  } else if (hasInnerNode(tree1, key) && isNotNull(tree1[key])) {
+    const nodeKeys = getKeys(tree1[key]);
+    const nodeValue = buildDiff(tree1[key], tree2, nodeKeys);
+    point = buildPoint('node', 'deleted', key, nodeValue);
+  } else if (hasInnerNode(tree2, key) && isNotNull(tree2[key])) {
+    const nodeKeys = getKeys(tree2[key]);
+    const nodeValue = buildDiff(tree1, tree2[key], nodeKeys);
+    point = buildPoint('node', 'added', key, nodeValue);
+  }
+  if (point === '') {
+    point = getLeafDiff(tree1, tree2, key);
+  }
+
+  return point;
 });
 
 export default buildDiff;
