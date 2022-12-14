@@ -1,74 +1,26 @@
 import _ from 'lodash';
 
-const buildKeys = (keys1, keys2 = undefined) => {
-  if (keys2 !== undefined) {
-    return _.sortBy(_.uniq([...Object.keys(keys1), ...Object.keys(keys2)]));
-  }
-  return _.sortBy(_.uniq([...Object.keys(keys1)]));
-};
+const buildKeys = (tree1, tree2) => _.sortBy(_.uniq([..._.keys(tree1), ..._.keys(tree2)]));
 
-const buildPoint = (type, status, key, value, otherValue) => {
-  if (status !== 'changed' && status !== 'changedToValue' && status !== 'changedToObject') {
+const buildDiff = (tree1, tree2) => {
+  const keys = buildKeys(tree1, tree2);
+  return keys.map((key) => {
+    if (_.isObject(tree1[key]) && _.isObject(tree2[key])) {
+      return { key, children: buildDiff(tree1[key], tree2[key]), status: 'node' };
+    }
+    if (!Object.hasOwn(tree1, key) && Object.hasOwn(tree2, key)) {
+      return { key, value: tree2[key], status: 'added' };
+    }
+    if (Object.hasOwn(tree1, key) && !Object.hasOwn(tree2, key)) {
+      return { key, value: tree1[key], status: 'deleted' };
+    }
+    if (tree1[key] === tree2[key]) {
+      return { key, value: tree1[key], status: 'unchanged' };
+    }
     return {
-      type, key, value, status,
+      key, valueFirst: tree1[key], valueSecond: tree2[key], status: 'changed',
     };
-  }
-  return {
-    type, key, valueBefore: value, valueAfter: otherValue, status,
-  };
+  });
 };
-
-const getLeafDiff = (node1, node2, key) => {
-  if (Object.hasOwn(node1, key) && Object.hasOwn(node2, key)) {
-    if (node1[key] === node2[key]) {
-      return buildPoint('leaf', 'unchanged', key, node1[key]);
-    }
-    return buildPoint('leaf', 'changed', key, node1[key], node2[key]);
-  }
-  if (Object.hasOwn(node1, key)) {
-    return buildPoint('leaf', 'deleted', key, node1[key]);
-  }
-  return buildPoint('leaf', 'added', key, node2[key]);
-};
-
-const hasBothNode = (obj1, obj2, key) => (Object.hasOwn(obj1, key) && Object.hasOwn(obj2, key));
-const isBothNode = (value1, value2) => (typeof value1 === 'object' && typeof value2 === 'object');
-const isNodeAndLeaf = (obj1, obj2) => (typeof obj1 === 'object' && typeof obj2 !== 'object');
-const isNotNull = (object) => !Object.is(object, null);
-const hasInnerNode = (object, key) => (Object.hasOwn(object, key) && typeof object[key] === 'object');
-
-const buildDiff = (tree1, tree2, keys) => keys.map((key) => {
-  if (hasBothNode(tree1, tree2, key)) {
-    if (isBothNode(tree1[key], tree2[key])) {
-      const nodeKeys = buildKeys(tree1[key], tree2[key]);
-      const nodeValue = buildDiff(tree1[key], tree2[key], nodeKeys);
-      return buildPoint('node', 'unchanged', key, nodeValue);
-    }
-    if (isNodeAndLeaf(tree1[key], tree2[key]) && isNotNull(tree1[key])) {
-      const nodeKeys = buildKeys(tree1[key]);
-      const nodeValue = buildDiff(tree1[key], tree2, nodeKeys);
-      return buildPoint('node', 'changedToValue', key, nodeValue, tree2[key]);
-    }
-    if (isNodeAndLeaf(tree2[key], tree1[key]) && isNotNull(tree2[key])) {
-      const nodeKeys = buildKeys(tree2[key]);
-      const nodeValue = buildDiff(tree1, tree2[key], nodeKeys);
-      return buildPoint('node', 'changedToObject', key, tree1[key], nodeValue);
-    }
-  }
-
-  if (hasInnerNode(tree1, key) && isNotNull(tree1[key])) {
-    const nodeKeys = buildKeys(tree1[key]);
-    const nodeValue = buildDiff(tree1[key], tree2, nodeKeys);
-    return buildPoint('node', 'deleted', key, nodeValue);
-  }
-
-  if (hasInnerNode(tree2, key) && isNotNull(tree2[key])) {
-    const nodeKeys = buildKeys(tree2[key]);
-    const nodeValue = buildDiff(tree1, tree2[key], nodeKeys);
-    return buildPoint('node', 'added', key, nodeValue);
-  }
-
-  return getLeafDiff(tree1, tree2, key);
-});
 
 export default buildDiff;

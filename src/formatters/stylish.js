@@ -1,80 +1,37 @@
-import _ from 'lodash';
-
-const getNoteLevel = (level) => {
-  const spaceArray = new Array(level - 1);
-  return _.fill(spaceArray, '    ').join('');
-};
-
-const buildLeaf = (leaf, level, type = 'withMarks') => {
-  if (type === 'withoutMarks') {
-    return `${getNoteLevel(level)}    ${leaf.key}: ${leaf.value}`;
-  }
-  if (leaf.status === 'unchanged') {
-    return `${getNoteLevel(level)}    ${leaf.key}: ${leaf.value}`;
-  }
-  if (leaf.status === 'deleted') {
-    return `${getNoteLevel(level)}  - ${leaf.key}: ${leaf.value}`;
-  }
-  if (leaf.status === 'added') {
-    return `${getNoteLevel(level)}  + ${leaf.key}: ${leaf.value}`;
-  }
-  return `${getNoteLevel(level)}  - ${leaf.key}: ${leaf.valueBefore}\n${getNoteLevel(level)}  + ${leaf.key}: ${leaf.valueAfter}`;
-};
-
-const buildNode = (name, level, status, nodeText, nodeTextAfter) => {
-  if (status === 'unchanged') {
-    return `${getNoteLevel(level)}    ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
-  }
-  if (status === 'changedToValue') {
-    return `${getNoteLevel(level)}  - ${name}: {\n${nodeTextAfter}\n${getNoteLevel(level)}    }\n${getNoteLevel(level)}  + ${name}: ${nodeText}`;
-  }
-  if (status === 'changedToObject') {
-    return `${getNoteLevel(level)}  - ${name}: ${nodeText}\n${getNoteLevel(level)}  + ${name}: {\n${nodeTextAfter}\n${getNoteLevel(level)}    }`;
-  }
-  if (status === 'added') {
-    return `${getNoteLevel(level)}  + ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
-  }
-  if (status === 'deleted') {
-    return `${getNoteLevel(level)}  - ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
-  }
-  return `${getNoteLevel(level)}    ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
-};
-
-const toStylishWithoutMarks = (diff, level = 1) => diff.flatMap((item) => {
-  if (item.type === 'node') {
-    const nodeText = toStylishWithoutMarks(item.value, level + 1);
-    return buildNode(item.key, level, 'withoutMarks', nodeText);
-  }
-  return buildLeaf(item, level, 'withoutMarks');
-})
-  .filter((item) => item !== '')
-  .join('\n');
-
-const buildNote = (node, level) => {
-  if (node.status === 'changedToValue') {
-    const nodeTextBefore = toStylishWithoutMarks(node.valueBefore, level + 1);
-    return buildNode(node.key, level, 'changedToValue', node.valueAfter, nodeTextBefore);
-  }
-  if (node.status === 'changedToObject') {
-    const nodeTextAfter = toStylishWithoutMarks(node.valueAfter, level + 1);
-    return buildNode(node.key, level, 'changedToObject', node.valueBefore, nodeTextAfter);
-  }
-  const nodeText = toStylishWithoutMarks(node.value, level + 1);
-  if (node.status === 'added') {
-    return buildNode(node.key, level, 'added', nodeText);
-  }
-  return buildNode(node.key, level, 'deleted', nodeText);
-};
-
-const toStylish = (diff, level = 1) => diff.flatMap((item) => {
-  if (item.type === 'node') {
-    if (item.status === 'unchanged') {
-      const nodeText = toStylish(item.value, level + 1);
-      return buildNode(item.key, level, 'unchanged', nodeText);
+const makeIndent = (f) => {
+  const file = f.split('\n');
+  return file.map((str) => {
+    if (str !== file[0]) {
+      return `    ${str}`;
     }
-    return buildNote(item, level);
+    return str;
+  }).join('\n');
+};
+
+const convert = (file) => {
+  const newFile = JSON.stringify(file, null, 4);
+  const unquoted = newFile.replaceAll('"', '');
+  const result = makeIndent(unquoted);
+  return result.replaceAll(',', '').trim();
+};
+
+const toStylish = (diff) => diff.map((node) => {
+  if (node.status === 'node') {
+    return `    ${node.key}: {\n    ${makeIndent(toStylish(node.children))}\n    }`;
   }
-  return buildLeaf(item, level);
+  if (node.status === 'unchanged') {
+    return `    ${node.key}: ${convert(node.value)}`;
+  }
+  if (node.status === 'changed') {
+    return `  - ${node.key}: ${convert(node.valueFirst)}\n  + ${node.key}: ${convert(node.valueSecond)}`;
+  }
+  if (node.status === 'added') {
+    return `  + ${node.key}: ${convert(node.value)}`;
+  }
+  if (node.status === 'deleted') {
+    return `  - ${node.key}: ${convert(node.value)}`;
+  }
+  return '';
 })
   .filter((item) => item !== '')
   .join('\n');

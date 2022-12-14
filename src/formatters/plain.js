@@ -1,59 +1,30 @@
-import _ from 'lodash';
-
-const valueWithQuotesIfNeeded = (incomeValue) => {
-  if (incomeValue === '[complex value]') {
-    return incomeValue;
+const buildValue = (value) => {
+  if (typeof value === 'object' && value !== null) {
+    return '[complex value]';
   }
-  return typeof incomeValue === 'string' ? `'${incomeValue}'` : incomeValue;
+  if (typeof value === 'string') {
+    return `'${value}'`;
+  }
+  return value;
 };
 
-const buildNote = (path, type, status, value, valueAfter) => {
-  const name = (type === 'node' ? _.slice(path, 0, path.length - 1).join('') : path);
-  if (status === 'added') {
-    return `Property '${name}' was added with value: ${valueWithQuotesIfNeeded(value)}`;
-  }
-  if (status === 'deleted') {
-    return `Property '${name}' was removed`;
-  }
-  return `Property '${name}' was updated. From ${valueWithQuotesIfNeeded(value)} to ${valueWithQuotesIfNeeded(valueAfter)}`;
-};
-
-const buildLeaf = (leaf, path) => {
-  if (leaf.status === 'changed') {
-    return buildNote(`${path}${leaf.key}`, 'leaf', 'changed', leaf.valueBefore, leaf.valueAfter);
-  }
-  if (leaf.status === 'deleted') {
-    return buildNote(`${path}${leaf.key}`, 'leaf', 'deleted');
-  }
-  if (leaf.status === 'added') {
-    return buildNote(`${path}${leaf.key}`, 'leaf', 'added', leaf.value);
-  }
-  return '';
-};
-
-const buildNode = (node, path) => {
-  if (node.status === 'changedToValue') {
-    return buildNote(path, 'node', 'changed', '[complex value]', node.valueAfter);
-  }
-  if (node.status === 'changedToObject') {
-    return buildNote(path, 'node', 'changed', node.valueBefore, '[complex value]');
+const toPlain = (diff, path = '') => diff.map((node) => {
+  const fullPath = (path === '') ? `${node.key}` : `${path}.${node.key}`;
+  if (node.status === 'deleted') {
+    return `Property '${fullPath}' was removed`;
   }
   if (node.status === 'added') {
-    return buildNote(path, 'node', 'added', '[complex value]');
+    return `Property '${fullPath}' was added with value: ${buildValue(node.value)}`;
   }
-  return buildNote(path, 'node', 'deleted');
-};
-
-const toPlain = (diff, path = '') => diff.flatMap((item) => {
-  if (item.type === 'node') {
-    if (item.status === 'unchanged') {
-      return toPlain(item.value, `${path}${item.key}.`);
-    }
-    return buildNode(item, `${path}${item.key}.`);
+  if (node.status === 'changed') {
+    return `Property '${fullPath}' was updated. From ${buildValue(node.valueFirst)} to ${buildValue(node.valueSecond)}`;
   }
-  return buildLeaf(item, path);
-});
-
-export default (diff) => toPlain(diff)
+  if (node.status === 'node') {
+    return toPlain(node.children, fullPath);
+  }
+  return '';
+})
   .filter((item) => item !== '')
   .join('\n');
+
+export default toPlain;
