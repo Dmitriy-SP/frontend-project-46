@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "type": "module",
   "description": "[![Actions Status](https://github.com/Dmitriy-SP/frontend-project-46/workflows/hexlet-check/badge.svg)](https://github.com/Dmitriy-SP/frontend-project-46/actions)",
-  "main": "bin/gendiff.js",
+  "main": "src/index.js",
   "bin": {
-    "code": "./src/gendiff.js"
+    "code": "bin/gendiff.js"
   },
   "scripts": {
     "test": "NODE_OPTIONS=--experimental-vm-modules npx jest"
