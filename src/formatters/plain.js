@@ -47,33 +47,21 @@ const buildNode = (node, path) => {
   return nodeString;
 };
 
-const addNote = (type, object, path) => {
-  if (type === 'node') {
-    return buildNode(object, path);
+const toPlain = (diff, nodePath = '') => diff.flatMap((item) => {
+  let path = nodePath;
+  if (item.type === 'node') {
+    path += `${item.key}.`;
+    if (item.status === 'unchanged') {
+      return toPlain(item.value, path);
+    }
+    return buildNode(item, path);
   }
-  if (type === 'leaf') {
-    return buildLeaf(object, path);
+  if (item.type === 'leaf') {
+    return buildLeaf(item, path);
   }
   return '';
-};
+});
 
-const toPlain = (diff, nodePath = '') => {
-  const result = diff.flatMap((item) => {
-    let path = nodePath;
-    if (item.type === 'node') {
-      path += `${item.key}.`;
-      if (item.status === 'unchanged') {
-        return toPlain(item.value, path);
-      }
-      return addNote('node', item, path);
-    }
-    if (item.type === 'leaf') {
-      return addNote('leaf', item, path);
-    }
-    return '';
-  }).filter((item) => item !== '');
-
-  return result.join('\n');
-};
-
-export default (diff) => toPlain(diff);
+export default (diff) => toPlain(diff)
+  .filter((item) => item !== '')
+  .join('\n');
