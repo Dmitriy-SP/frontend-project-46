@@ -10,45 +10,41 @@ const buildNote = (path, type, status, value, valueAfter) => {
   if (type === 'node') {
     name = name.slice(0, path.lastIndexOf('.'));
   }
+  let nodeString = '';
   if (status === 'changed') {
-    return `Property '${name}' was updated. From ${valueWithQuotesIfNeeded(value)} to ${valueWithQuotesIfNeeded(valueAfter)}\n`;
+    nodeString = `Property '${name}' was updated. From ${valueWithQuotesIfNeeded(value)} to ${valueWithQuotesIfNeeded(valueAfter)}\n`;
+  } else if (status === 'added') {
+    nodeString = `Property '${name}' was added with value: ${valueWithQuotesIfNeeded(value)}\n`;
+  } else if (status === 'deleted') {
+    nodeString = `Property '${name}' was removed\n`;
   }
-  if (status === 'added') {
-    return `Property '${name}' was added with value: ${valueWithQuotesIfNeeded(value)}\n`;
-  }
-  if (status === 'deleted') {
-    return `Property '${name}' was removed\n`;
-  }
-  return '';
+  return nodeString;
 };
 
 const buildLeaf = (leaf, path) => {
+  let leafString = '';
   if (leaf.status === 'changed') {
-    return buildNote(`${path}${leaf.key}`, 'leaf', 'changed', leaf.valueBefore, leaf.valueAfter);
+    leafString = buildNote(`${path}${leaf.key}`, 'leaf', 'changed', leaf.valueBefore, leaf.valueAfter);
+  } else if (leaf.status === 'deleted') {
+    leafString = buildNote(`${path}${leaf.key}`, 'leaf', 'deleted');
+  } else if (leaf.status === 'added') {
+    leafString = buildNote(`${path}${leaf.key}`, 'leaf', 'added', leaf.value);
   }
-  if (leaf.status === 'deleted') {
-    return buildNote(`${path}${leaf.key}`, 'leaf', 'deleted');
-  }
-  if (leaf.status === 'added') {
-    return buildNote(`${path}${leaf.key}`, 'leaf', 'added', leaf.value);
-  }
-  return '';
+  return leafString;
 };
 
 const buildNode = (node, path) => {
+  let nodeString = '';
   if (node.status === 'changedToValue') {
-    return buildNote(path, 'node', 'changed', '[complex value]', node.valueAfter);
+    nodeString = buildNote(path, 'node', 'changed', '[complex value]', node.valueAfter);
+  } else if (node.status === 'changedToObject') {
+    nodeString = buildNote(path, 'node', 'changed', node.valueBefore, '[complex value]');
+  } else if (node.status === 'added') {
+    nodeString = buildNote(path, 'node', 'added', '[complex value]');
+  } else if (node.status === 'deleted') {
+    nodeString = buildNote(path, 'node', 'deleted');
   }
-  if (node.status === 'changedToObject') {
-    return buildNote(path, 'node', 'changed', node.valueBefore, '[complex value]');
-  }
-  if (node.status === 'added') {
-    return buildNote(path, 'node', 'added', '[complex value]');
-  }
-  if (node.status === 'deleted') {
-    return buildNote(path, 'node', 'deleted');
-  }
-  return '';
+  return nodeString;
 };
 
 const addNote = (type, object, path) => {
