@@ -11,7 +11,7 @@ test('nonexistent file format with JSON', () => {
   expect(genDiff(filepath1JSON, filepath2JSON, 'txt')).toEqual(exampleError);
 });
 
-test('nonexistent file format with JSON', () => {
+test('nonexistent file format with Yaml', () => {
   const exampleError = 'error, nonexistent format.\nsupported formats: \'stylish\', \'plain\'.';
   expect(genDiff(filepath1Yaml, filepath2Yaml, 'txt')).toEqual(exampleError);
 });
@@ -21,7 +21,7 @@ test('nonexistent formaters with JSON', () => {
   expect(genDiff(filepath1JSON, './__tests__/__fixtures__/exampleJSON.txt', 'json')).toEqual(exampleError);
 });
 
-test('nonexistent formaters with JSON', () => {
+test('nonexistent formaters with Yaml', () => {
   const exampleError = 'error, nonexistent file format.\nsupported formats: \'json\', \'yaml\'.';
   expect(genDiff(filepath1Yaml, './__tests__/__fixtures__/exampleJSON.txt', 'json')).toEqual(exampleError);
 });

@@ -1,46 +1,50 @@
 const getNoteLevel = (level) => {
-  let spaceString = '';
+  const spaceArray = [];
   for (let i = 1; i < level; i += 1) {
-    spaceString += '    ';
+    spaceArray.push('    ');
   }
-  return spaceString;
+  return spaceArray.join('');
 };
 
 const buildLeaf = (leaf, level, type = 'withMarks') => {
-  let leafString = '';
   if (type === 'withoutMarks') {
-    leafString = `${getNoteLevel(level)}    ${leaf.key}: ${leaf.value}`;
-  } else if (leaf.status === 'unchanged') {
-    leafString = `${getNoteLevel(level)}    ${leaf.key}: ${leaf.value}`;
-  } else if (leaf.status === 'deleted') {
-    leafString = `${getNoteLevel(level)}  - ${leaf.key}: ${leaf.value}`;
-  } else if (leaf.status === 'added') {
-    leafString = `${getNoteLevel(level)}  + ${leaf.key}: ${leaf.value}`;
-  } else if (leaf.status === 'changed') {
-    leafString = `${getNoteLevel(level)}  - ${leaf.key}: ${leaf.valueBefore}\n`;
-    leafString += `${getNoteLevel(level)}  + ${leaf.key}: ${leaf.valueAfter}`;
+    return `${getNoteLevel(level)}    ${leaf.key}: ${leaf.value}`;
   }
-  return leafString;
+  if (leaf.status === 'unchanged') {
+    return `${getNoteLevel(level)}    ${leaf.key}: ${leaf.value}`;
+  }
+  if (leaf.status === 'deleted') {
+    return `${getNoteLevel(level)}  - ${leaf.key}: ${leaf.value}`;
+  }
+  if (leaf.status === 'added') {
+    return `${getNoteLevel(level)}  + ${leaf.key}: ${leaf.value}`;
+  }
+  if (leaf.status === 'changed') {
+    return `${getNoteLevel(level)}  - ${leaf.key}: ${leaf.valueBefore}\n${getNoteLevel(level)}  + ${leaf.key}: ${leaf.valueAfter}`;
+  }
+  return '';
 };
 
 const buildNode = (name, level, status, nodeText, nodeTextAfter) => {
-  let nodeString = '';
   if (status === 'unchanged') {
-    nodeString = `${getNoteLevel(level)}    ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
-  } else if (status === 'changedToValue') {
-    nodeString = `${getNoteLevel(level)}  - ${name}: {\n${nodeTextAfter}\n${getNoteLevel(level)}    }\n`;
-    nodeString += `${getNoteLevel(level)}  + ${name}: ${nodeText}`;
-  } else if (status === 'changedToObject') {
-    nodeString = `${getNoteLevel(level)}  - ${name}: ${nodeText}\n`;
-    nodeString += `${getNoteLevel(level)}  + ${name}: {\n${nodeTextAfter}\n${getNoteLevel(level)}    }`;
-  } else if (status === 'added') {
-    nodeString = `${getNoteLevel(level)}  + ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
-  } else if (status === 'deleted') {
-    nodeString = `${getNoteLevel(level)}  - ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
-  } else if (status === 'withoutMarks') {
-    nodeString = `${getNoteLevel(level)}    ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
+    return `${getNoteLevel(level)}    ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
   }
-  return nodeString;
+  if (status === 'changedToValue') {
+    return `${getNoteLevel(level)}  - ${name}: {\n${nodeTextAfter}\n${getNoteLevel(level)}    }\n${getNoteLevel(level)}  + ${name}: ${nodeText}`;
+  }
+  if (status === 'changedToObject') {
+    return `${getNoteLevel(level)}  - ${name}: ${nodeText}\n${getNoteLevel(level)}  + ${name}: {\n${nodeTextAfter}\n${getNoteLevel(level)}    }`;
+  }
+  if (status === 'added') {
+    return `${getNoteLevel(level)}  + ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
+  }
+  if (status === 'deleted') {
+    return `${getNoteLevel(level)}  - ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
+  }
+  if (status === 'withoutMarks') {
+    return `${getNoteLevel(level)}    ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
+  }
+  return '';
 };
 
 const toStylishWithoutMarks = (diff, level = 1) => diff.flatMap((item) => {
@@ -54,22 +58,22 @@ const toStylishWithoutMarks = (diff, level = 1) => diff.flatMap((item) => {
   .join('\n');
 
 const buildNote = (node, level) => {
-  let nodeString = '';
   if (node.status === 'changedToValue') {
     const nodeTextBefore = toStylishWithoutMarks(node.valueBefore, level + 1);
-    nodeString = buildNode(node.key, level, 'changedToValue', node.valueAfter, nodeTextBefore);
-  } else if (node.status === 'changedToObject') {
-    const nodeTextAfter = toStylishWithoutMarks(node.valueAfter, level + 1);
-    nodeString = buildNode(node.key, level, 'changedToObject', node.valueBefore, nodeTextAfter);
-  } else {
-    const nodeText = toStylishWithoutMarks(node.value, level + 1);
-    if (node.status === 'added') {
-      nodeString = buildNode(node.key, level, 'added', nodeText);
-    } else if (node.status === 'deleted') {
-      nodeString = buildNode(node.key, level, 'deleted', nodeText);
-    }
+    return buildNode(node.key, level, 'changedToValue', node.valueAfter, nodeTextBefore);
   }
-  return nodeString;
+  if (node.status === 'changedToObject') {
+    const nodeTextAfter = toStylishWithoutMarks(node.valueAfter, level + 1);
+    return buildNode(node.key, level, 'changedToObject', node.valueBefore, nodeTextAfter);
+  }
+  const nodeText = toStylishWithoutMarks(node.value, level + 1);
+  if (node.status === 'added') {
+    return buildNode(node.key, level, 'added', nodeText);
+  }
+  if (node.status === 'deleted') {
+    return buildNode(node.key, level, 'deleted', nodeText);
+  }
+  return '';
 };
 
 const toStylish = (diff, level = 1) => diff.flatMap((item) => {
