@@ -1,8 +1,7 @@
 import _ from 'lodash';
 
 const getNoteLevel = (level) => {
-  const spaceArray = [];
-  spaceArray.length = level - 1;
+  const spaceArray = new Array(level - 1);
   return _.fill(spaceArray, '    ').join('');
 };
 
