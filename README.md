@@ -27,4 +27,6 @@ Options:
 ```
 
 ## Examples
-<script id="asciicast-hocBI8q6qgavYrsZgDz5kHfzp" src="https://asciinema.org/a/hocBI8q6qgavYrsZgDz5kHfzp.js" async></script>
+<a href="https://asciinema.org/a/hocBI8q6qgavYrsZgDz5kHfzp" target="_blank"><img src="https://asciinema.org/a/hocBI8q6qgavYrsZgDz5kHfzp.svg" /></a>
+
+[![asciicast](https://asciinema.org/a/hocBI8q6qgavYrsZgDz5kHfzp.svg)](https://asciinema.org/a/hocBI8q6qgavYrsZgDz5kHfzp)
