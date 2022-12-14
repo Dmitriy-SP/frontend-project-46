@@ -18,10 +18,7 @@ const buildLeaf = (leaf, level, type = 'withMarks') => {
   if (leaf.status === 'added') {
     return `${getNoteLevel(level)}  + ${leaf.key}: ${leaf.value}`;
   }
-  if (leaf.status === 'changed') {
-    return `${getNoteLevel(level)}  - ${leaf.key}: ${leaf.valueBefore}\n${getNoteLevel(level)}  + ${leaf.key}: ${leaf.valueAfter}`;
-  }
-  return '';
+  return `${getNoteLevel(level)}  - ${leaf.key}: ${leaf.valueBefore}\n${getNoteLevel(level)}  + ${leaf.key}: ${leaf.valueAfter}`;
 };
 
 const buildNode = (name, level, status, nodeText, nodeTextAfter) => {
@@ -40,10 +37,7 @@ const buildNode = (name, level, status, nodeText, nodeTextAfter) => {
   if (status === 'deleted') {
     return `${getNoteLevel(level)}  - ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
   }
-  if (status === 'withoutMarks') {
-    return `${getNoteLevel(level)}    ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
-  }
-  return '';
+  return `${getNoteLevel(level)}    ${name}: {\n${nodeText}\n${getNoteLevel(level)}    }`;
 };
 
 const toStylishWithoutMarks = (diff, level = 1) => diff.flatMap((item) => {
@@ -69,10 +63,7 @@ const buildNote = (node, level) => {
   if (node.status === 'added') {
     return buildNode(node.key, level, 'added', nodeText);
   }
-  if (node.status === 'deleted') {
-    return buildNode(node.key, level, 'deleted', nodeText);
-  }
-  return '';
+  return buildNode(node.key, level, 'deleted', nodeText);
 };
 
 const toStylish = (diff, level = 1) => diff.flatMap((item) => {
