@@ -10,17 +10,17 @@ const buildValue = (value) => {
 
 const toPlain = (diff, path = '') => diff.map((node) => {
   const fullPath = (path === '') ? `${node.key}` : `${path}.${node.key}`;
-  if (node.status === 'deleted') {
-    return `Property '${fullPath}' was removed`;
-  }
-  if (node.status === 'added') {
-    return `Property '${fullPath}' was added with value: ${buildValue(node.value)}`;
+  if (node.status === 'node') {
+    return toPlain(node.children, fullPath);
   }
   if (node.status === 'changed') {
     return `Property '${fullPath}' was updated. From ${buildValue(node.valueFirst)} to ${buildValue(node.valueSecond)}`;
   }
-  if (node.status === 'node') {
-    return toPlain(node.children, fullPath);
+  if (node.status === 'added') {
+    return `Property '${fullPath}' was added with value: ${buildValue(node.value)}`;
+  }
+  if (node.status === 'deleted') {
+    return `Property '${fullPath}' was removed`;
   }
   return '';
 })

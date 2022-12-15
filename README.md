@@ -50,10 +50,10 @@ Options:
 <a href="https://asciinema.org/a/fLp21wW4TfMlLHp1wzVxS2Thk" target="_blank"><img src="https://asciinema.org/a/fLp21wW4TfMlLHp1wzVxS2Thk.svg" /></a>
 
 ### Nested files:
-<a href="https://asciinema.org/a/1WDqsfNNowJFGbn4MpVfvORuO" target="_blank"><img src="https://asciinema.org/a/1WDqsfNNowJFGbn4MpVfvORuO.svg" /></a>
+<a href="https://asciinema.org/a/vhtjNtaxTuMRvZgIl9AWXvZth" target="_blank"><img src="https://asciinema.org/a/vhtjNtaxTuMRvZgIl9AWXvZth.svg" /></a>
 
 ### Available formatters
-<a href="https://asciinema.org/a/66mats3kaB2vEeARtUDvpUVqf" target="_blank"><img src="https://asciinema.org/a/66mats3kaB2vEeARtUDvpUVqf.svg" /></a>
+<a href="https://asciinema.org/a/y4eYXsuvhuvk2Etet6iQbp3Be" target="_blank"><img src="https://asciinema.org/a/y4eYXsuvhuvk2Etet6iQbp3Be.svg" /></a>
 
 ### Submitted files:
 

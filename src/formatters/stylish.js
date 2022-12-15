@@ -1,23 +1,23 @@
-const makeIndent = (f) => {
-  const file = f.split('\n');
-  return file.map((str) => {
-    if (str !== file[0]) {
-      return `    ${str}`;
+const addSpaceTo = (value) => {
+  const valueArray = value.split('\n');
+  return valueArray.map((item) => {
+    if (item !== valueArray[0]) {
+      return `    ${item}`;
     }
-    return str;
+    return item;
   }).join('\n');
 };
 
-const convert = (file) => {
-  const newFile = JSON.stringify(file, null, 4);
-  const unquoted = newFile.replaceAll('"', '');
-  const result = makeIndent(unquoted);
-  return result.replaceAll(',', '').trim();
+const convert = (value) => {
+  const convertedValue = JSON.stringify(value, null, 4)
+    .replaceAll('"', '')
+    .replaceAll(',', '');
+  return addSpaceTo(convertedValue);
 };
 
 const toStylish = (diff) => diff.map((node) => {
   if (node.status === 'node') {
-    return `    ${node.key}: {\n    ${makeIndent(toStylish(node.children))}\n    }`;
+    return `    ${node.key}: {\n    ${addSpaceTo(toStylish(node.children))}\n    }`;
   }
   if (node.status === 'unchanged') {
     return `    ${node.key}: ${convert(node.value)}`;
