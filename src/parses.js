@@ -1,12 +1,8 @@
 import yaml from 'js-yaml';
-import * as fs from 'node:fs';
-import path from 'node:path';
 
-export default (filePath) => {
-  if (filePath.endsWith('.json')) {
-    return JSON.parse(fs.readFileSync(path.resolve(filePath), 'utf8'));
-  } if (filePath.endsWith('.yaml') || filePath.endsWith('.yml')) {
-    return yaml.load(fs.readFileSync(path.resolve(filePath), 'utf8'));
+export default (data, type) => {
+  if (type === 'json') {
+    return JSON.parse(data, 'utf8');
   }
-  return 'error';
+  return yaml.load(data, 'utf8');
 };

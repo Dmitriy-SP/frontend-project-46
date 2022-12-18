@@ -1,17 +1,32 @@
-import _ from 'lodash';
-import parseFile from './parses.js';
+import * as fs from 'node:fs';
+import path from 'node:path';
+import parse from './parses.js';
 import buildDiff from './buildDiff.js';
-import chouseFormatters from './formatters/index.js';
+import format from './formatters/index.js';
+
+const getPath = (filePath) => fs.readFileSync(path.resolve(filePath));
+const getType = (filePath) => filePath.slice(filePath.lastIndexOf('.') + 1);
+
+const isTypesRight = (filePath1, filePath2) => {
+  const file1Type = getType(filePath1);
+  const file2Type = getType(filePath2);
+  if (file1Type === 'json' && file2Type === 'json') {
+    return true;
+  }
+  if ((file1Type === 'yaml' || file1Type === 'yml') && (file2Type === 'yaml' || file2Type === 'yml')) {
+    return true;
+  }
+  return false;
+};
 
 const genDifferent = (filePath1, filePath2, formatName) => {
-  const tree1 = parseFile(filePath1);
-  const tree2 = parseFile(filePath2);
-  if (tree1 === 'error' || tree2 === 'error') {
-    return 'error, nonexistent file format.\nsupported formats: \'json\', \'yaml\'.';
+  if (isTypesRight) {
+    const tree1 = parse(getPath(filePath1), getType(filePath1));
+    const tree2 = parse(getPath(filePath2), getType(filePath2));
+    const diff = buildDiff(tree1, tree2);
+    return format(diff, formatName);
   }
-  const keys = _.sortBy(_.uniq([...Object.keys(tree1), ...Object.keys(tree2)]));
-  const diff = buildDiff(tree1, tree2, keys);
-  return chouseFormatters(diff, formatName);
+  throw new Error('error, nonexistent file format.\nsupported formats: \'json\', \'yaml\'.');
 };
 
 export default genDifferent;
