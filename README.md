@@ -37,7 +37,7 @@ Usage: gendiff [options] <filepath1> <filepath2>
 Compares two configuration files and shows a difference.
 Options:
   -V, --version        output the version number
-  -f, --format <type>  output format
+  -f, --format <type>  output format (default: "stylish")
   -h, --help           display help for command
 ```
 
