@@ -1,8 +1,12 @@
+import _ from 'lodash';
+
 const indent = (level, spacesCount = 4) => ' '.repeat((level - 1) * spacesCount);
 
 const writeNote = (value, level) => {
-  if (typeof value === 'object' && value !== null) {
-    const note = Object.keys(value).map((item) => `${indent(level)}    ${item}: ${writeNote(value[item], level + 1)}`).join('\n');
+  if (_.isObject(value)) {
+    const note = Object.keys(value)
+      .map((item) => `${indent(level)}    ${item}: ${writeNote(value[item], level + 1)}`)
+      .join('\n');
     return `{\n${note}\n${indent(level)}}`;
   }
   return value;
@@ -24,9 +28,8 @@ const iterStylish = (node, level) => node.map((item) => {
       throw new Error('error, unknown node status');
   }
 })
-  .filter((item) => item !== '')
   .join('\n');
 
-const toStylish = (diff) => iterStylish(diff, 1);
+const toStylish = (diff) => `{\n${iterStylish(diff, 1)}\n}`;
 
-export default (diff) => `{\n${toStylish(diff)}\n}`;
+export default toStylish;

@@ -1,6 +1,8 @@
 import _ from 'lodash';
 
-const buildKeys = (tree1, tree2) => _.sortBy(_.uniq([..._.keys(tree1), ..._.keys(tree2)]));
+const buildKeys = (tree1, tree2) => _.sortBy(_.uniq([
+  ...Object.keys(tree1), ...Object.keys(tree2),
+]));
 
 const buildDiff = (tree1, tree2) => {
   const keys = buildKeys(tree1, tree2);
