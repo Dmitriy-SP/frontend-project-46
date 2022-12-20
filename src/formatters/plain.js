@@ -8,17 +8,17 @@ const buildValue = (value) => {
   return value;
 };
 
-const toPlain = (diff, path = '') => diff.map((node) => {
-  const fullPath = (path === '') ? `${node.key}` : `${path}.${node.key}`;
-  switch (node.status) {
+const iterPlain = (node, path) => node.map((item) => {
+  const fullPath = (path === '') ? `${item.key}` : `${path}.${item.key}`;
+  switch (item.status) {
     case 'node':
-      return toPlain(node.children, fullPath);
+      return iterPlain(item.children, fullPath);
     case 'unchanged':
       return '';
     case 'changed':
-      return `Property '${fullPath}' was updated. From ${buildValue(node.value1)} to ${buildValue(node.value2)}`;
+      return `Property '${fullPath}' was updated. From ${buildValue(item.value1)} to ${buildValue(item.value2)}`;
     case 'added':
-      return `Property '${fullPath}' was added with value: ${buildValue(node.value)}`;
+      return `Property '${fullPath}' was added with value: ${buildValue(item.value)}`;
     case 'deleted':
       return `Property '${fullPath}' was removed`;
     default:
@@ -27,5 +27,7 @@ const toPlain = (diff, path = '') => diff.map((node) => {
 })
   .filter((item) => item !== '')
   .join('\n');
+
+const toPlain = (diff) => iterPlain(diff, '');
 
 export default toPlain;

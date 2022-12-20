@@ -1,43 +1,32 @@
-const addSpace = (desireLevel, level = 1, string = '') => {
-  if (level < desireLevel) {
-    return addSpace(desireLevel, level + 1, `    ${string}`);
-  }
-  return string;
-};
+const indent = (level, spacesCount = 4) => ' '.repeat((level - 1) * spacesCount);
 
 const writeNote = (value, level) => {
-  const item = JSON.stringify(value, null, 4)
-    .replaceAll('"', '')
-    .replaceAll(',', '');
-
-  if (!item.includes('\n')) {
-    return item;
+  if (typeof value === 'object' && value !== null) {
+    const note = Object.keys(value).map((item) => `${indent(level)}    ${item}: ${writeNote(value[item], level + 1)}`).join('\n');
+    return `{\n${note}\n${indent(level)}}`;
   }
-  return item.split('\n').map((a) => {
-    if (a === '{') {
-      return a;
-    }
-    return `${addSpace(level)}    ${a}`;
-  }).join('\n');
+  return value;
 };
 
-const toStylish = (diff, level = 1) => diff.map((node) => {
-  switch (node.status) {
+const iterStylish = (node, level) => node.map((item) => {
+  switch (item.status) {
     case 'node':
-      return `${addSpace(level)}    ${node.key}: {\n${toStylish(node.children, level + 1)}\n${addSpace(level)}    }`;
+      return `${indent(level)}    ${item.key}: {\n${iterStylish(item.children, level + 1)}\n${indent(level)}    }`;
     case 'changed':
-      return `${addSpace(level)}  - ${node.key}: ${writeNote(node.value1, level)}\n${addSpace(level)}  + ${node.key}: ${writeNote(node.value2, level)}`;
+      return `${indent(level)}  - ${item.key}: ${writeNote(item.value1, level + 1)}\n${indent(level)}  + ${item.key}: ${writeNote(item.value2, level + 1)}`;
     case 'unchanged':
-      return `${addSpace(level)}    ${node.key}: ${writeNote(node.value, level)}`;
+      return `${indent(level)}    ${item.key}: ${writeNote(item.value, level + 1)}`;
     case 'added':
-      return `${addSpace(level)}  + ${node.key}: ${writeNote(node.value, level)}`;
+      return `${indent(level)}  + ${item.key}: ${writeNote(item.value, level + 1)}`;
     case 'deleted':
-      return `${addSpace(level)}  - ${node.key}: ${writeNote(node.value, level)}`;
+      return `${indent(level)}  - ${item.key}: ${writeNote(item.value, level + 1)}`;
     default:
       throw new Error('error, unknown node status');
   }
 })
   .filter((item) => item !== '')
   .join('\n');
+
+const toStylish = (diff) => iterStylish(diff, 1);
 
 export default (diff) => `{\n${toStylish(diff)}\n}`;
