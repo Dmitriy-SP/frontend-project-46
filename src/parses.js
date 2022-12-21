@@ -5,10 +5,9 @@ export default (data, type) => {
     case 'json':
       return JSON.parse(data, 'utf8');
     case 'yaml':
-      return yaml.load(data, 'utf8');
     case 'yml':
       return yaml.load(data, 'utf8');
     default:
-      throw new Error('error, nonexistent file format.\nsupported formats: \'json\', \'yaml\'.');
+      throw new Error('error, nonexistent вфеф format.\nsupported formats: \'json\', \'yaml\'.');
   }
 };
